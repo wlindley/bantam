@@ -9,7 +9,12 @@ namespace Bantam
 		private Dictionary<Type, ArrayList> listeners = new Dictionary<Type, ArrayList>();
 		private Dictionary<Type, ArrayList> onceListeners = new Dictionary<Type, ArrayList>();
 		private ArrayList allListeners = new ArrayList();
-		private ObjectPool pool = new ObjectPool();
+		private ObjectPool pool;
+
+		public EventBus(ObjectPool pool)
+		{
+			this.pool = pool;
+		}
 
 		public void AddListener<T>(Action<T> listener) where T : class, Event, new()
 		{

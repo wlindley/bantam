@@ -11,7 +11,7 @@ namespace Bantam.Test
 		[SetUp]
 		public void SetUp()
 		{
-			testObj = new EventBus();
+			testObj = new EventBus(new ObjectPool());
 		}
 
 		[Test]

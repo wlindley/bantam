@@ -11,8 +11,9 @@ namespace Bantam.Test
 		[SetUp]
 		public void SetUp()
 		{
-			eventBus = new EventBus();
-			testObj = new CommandManager(eventBus);
+			var pool = new ObjectPool();
+			eventBus = new EventBus(pool);
+			testObj = new CommandManager(eventBus, pool);
 		}
 
 		[Test]

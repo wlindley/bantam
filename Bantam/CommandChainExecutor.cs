@@ -3,28 +3,33 @@ using System.Collections.Generic;
 
 namespace Bantam
 {
-	class CommandChainExecutor
+	class CommandChainExecutor : Poolable
 	{
 		private CommandManager manager;
+		private Event triggeringEvent;
 		private List<CommandChain.CommandTemplate>.Enumerator enumerator;
 		private Command currentCommand;
-		private Event triggeringEvent;
 
-		public CommandChainExecutor(CommandChain chain, CommandManager manager)
+		public void Reset()
 		{
+			manager = null;
+			triggeringEvent = null;
+			enumerator.Dispose();
+			currentCommand = null;
+		}
+
+		internal void Start(Event triggeringEvent, CommandChain chain, CommandManager manager)
+		{
+			this.triggeringEvent = triggeringEvent;
 			this.manager = manager;
 			enumerator = chain.Commands.GetEnumerator();
 			enumerator.MoveNext();
-		}
-
-		internal void Start(Event ev)
-		{
-			triggeringEvent = ev;
 			Next();
 		}
 
 		internal void Complete()
 		{
+			currentCommand = null;
 			if (enumerator.MoveNext())
 				Next();
 			else
