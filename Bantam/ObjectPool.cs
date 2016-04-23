@@ -7,6 +7,7 @@ namespace Bantam
 	public class ObjectPool
 	{
 		private Dictionary<Type, Queue<Poolable>> instances = new Dictionary<Type, Queue<Poolable>>();
+		public Dictionary<Type, int> UniqueInstances = new Dictionary<Type, int>();
 
 		public T Allocate<T>() where T : class, Poolable, new()
 		{
@@ -48,7 +49,10 @@ namespace Bantam
 		private void EnsurePoolExists(Type type)
 		{
 			if (!instances.ContainsKey(type))
+			{
 				instances[type] = new Queue<Poolable>();
+				UniqueInstances[type] = 0;
+			}
 		}
 
 		private void ValidateType(Type type)
@@ -65,10 +69,13 @@ namespace Bantam
 		{
 			T instance;
 			var type = typeof(T);
-			if (0 < instances[type].Count)
-				instance = instances[type].Dequeue() as T;
-			else
+			if (0 >= instances[type].Count)
+			{
 				instance = new T();
+				UniqueInstances[type]++;
+			}
+			else
+				instance = instances[type].Dequeue() as T;
 			instance.Reset();
 			return instance;
 		}
@@ -76,10 +83,13 @@ namespace Bantam
 		private Poolable GetInstance(Type type)
 		{
 			Poolable instance;
-			if (0 < instances[type].Count)
-				instance = instances[type].Dequeue();
-			else
+			if (0 >= instances[type].Count)
+			{
 				instance = Activator.CreateInstance(type) as Poolable;
+				UniqueInstances[type]++;
+			}
+			else
+				instance = instances[type].Dequeue();
 			instance.Reset();
 			return instance;
 		}

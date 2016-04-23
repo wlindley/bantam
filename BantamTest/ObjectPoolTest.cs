@@ -109,6 +109,19 @@ namespace Bantam.Test
 		{
 			Assert.Throws<MismatchedTypeException>(() => testObj.Free(typeof(DummyType), new DummyEvent()));
 		}
+
+		[Test]
+		public void UniqueInstancesReflectsTheNumberOfAllocationsPoolHasDoneForEachType()
+		{
+			testObj.Allocate<DummyType>();
+			testObj.Allocate<DummyType>();
+			testObj.Allocate<DummyType>();
+			testObj.Allocate<DummyEvent>();
+
+			Assert.AreEqual(3, testObj.UniqueInstances[typeof(DummyType)]);
+			Assert.AreEqual(1, testObj.UniqueInstances[typeof(DummyEvent)]);
+			Assert.IsFalse(testObj.UniqueInstances.ContainsKey(typeof(DummyCommand)));
+		}
 	}
 
 	public class DummyType : Poolable
