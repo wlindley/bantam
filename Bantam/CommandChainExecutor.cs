@@ -7,7 +7,7 @@ namespace Bantam
 	{
 		private CommandRelay manager;
 		private Event triggeringEvent;
-		private List<CommandTemplate>.Enumerator enumerator;
+		private List<CommandAllocator>.Enumerator enumerator;
 		private ObjectPool pool;
 		private Command currentCommand;
 
@@ -42,8 +42,7 @@ namespace Bantam
 
 		private void Next()
 		{
-			var template = enumerator.Current;
-			currentCommand = template.AllocateCommand(pool, triggeringEvent);
+			currentCommand = enumerator.Current.AllocateCommand(pool, triggeringEvent);
 			currentCommand.Start(this);
 		}
 	}

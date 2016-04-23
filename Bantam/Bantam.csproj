@@ -39,7 +39,7 @@
     <Compile Include="CommandChain.cs" />
     <Compile Include="CommandChainExecutor.cs" />
     <Compile Include="CommandRelay.cs" />
-    <Compile Include="CommandTemplate.cs" />
+    <Compile Include="CommandAllocator.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

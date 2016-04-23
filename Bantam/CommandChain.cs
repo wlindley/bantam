@@ -5,14 +5,14 @@ namespace Bantam
 {
 	public abstract class CommandChain
 	{
-		internal List<CommandTemplate> Commands = new List<CommandTemplate>();
+		internal List<CommandAllocator> Commands = new List<CommandAllocator>();
 	}
 
 	public class CommandChain<T> : CommandChain where T : class, Event
 	{
 		public CommandChain<T> Do<U>(Action<U, T> initializer = null) where U : Command, new()
 		{
-			Commands.Add(new CommandTemplate<T, U>(initializer));
+			Commands.Add(new CommandAllocator<T, U>(initializer));
 			return this;
 		}
 	}

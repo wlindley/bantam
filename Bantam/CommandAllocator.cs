@@ -2,17 +2,17 @@
 
 namespace Bantam
 {
-	internal interface CommandTemplate
+	internal interface CommandAllocator
 	{
 		Command AllocateCommand(ObjectPool pool, Event ev);
 		void FreeCommand(ObjectPool pool, Command command);
 	}
 
-	internal class CommandTemplate<T, U> : CommandTemplate where T : class, Event where U : Command, new()
+	internal class CommandAllocator<T, U> : CommandAllocator where T : class, Event where U : Command, new()
 	{
 		private Action<U, T> initializer;
 
-		public CommandTemplate(Action<U, T> initializer = null)
+		public CommandAllocator(Action<U, T> initializer = null)
 		{
 			this.initializer = initializer;
 		}
