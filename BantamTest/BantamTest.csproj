@@ -47,5 +47,6 @@
     <Compile Include="ObjectPoolTest.cs" />
     <Compile Include="EventBusTest.cs" />
     <Compile Include="CommandRelayTest.cs" />
+    <Compile Include="IntegrationTest.cs" />
   </ItemGroup>
 </Project>
