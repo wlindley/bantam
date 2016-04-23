@@ -11,8 +11,7 @@ namespace Bantam
 		public T Allocate<T>() where T : class, Poolable, new()
 		{
 			EnsurePoolExists<T>();
-			var instance = GetInstance<T>();
-			return instance;
+			return GetInstance<T>();
 		}
 
 		public void Release<T>(T instance)
