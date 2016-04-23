@@ -36,6 +36,10 @@
     <Compile Include="ObjectPool.cs" />
     <Compile Include="EventBus.cs" />
     <Compile Include="Event.cs" />
+    <Compile Include="CommandManager.cs" />
+    <Compile Include="Command.cs" />
+    <Compile Include="CommandChain.cs" />
+    <Compile Include="CommandChainExecutor.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
