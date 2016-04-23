@@ -21,7 +21,12 @@ namespace Bantam
 
 		protected void Done()
 		{
-			executor.Complete();
+			executor.CurrentCommandComplete();
+		}
+
+		protected void Fail()
+		{
+			executor.CurrentCommandFailed();
 		}
 	}
 }

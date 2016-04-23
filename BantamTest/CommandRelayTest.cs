@@ -14,12 +14,13 @@ namespace Bantam.Test
 			var pool = new ObjectPool();
 			eventBus = new EventBus(pool);
 			testObj = new CommandRelay(eventBus, pool);
+			DummyCommand.ExecuteCount = 0;
+			DummyCommand.LastValue = 0;
 		}
 
 		[Test]
 		public void OnDoCausesCommandToBeExecuted()
 		{
-			DummyCommand.ExecuteCount = 0;
 			testObj.On<DummyEvent>().Do<DummyCommand>();
 			eventBus.Dispatch<DummyEvent>();
 			Assert.AreEqual(1, DummyCommand.ExecuteCount);
@@ -28,7 +29,6 @@ namespace Bantam.Test
 		[Test]
 		public void DoCanBeChainedForMultipleCommands()
 		{
-			DummyCommand.ExecuteCount = 0;
 			testObj.On<DummyEvent>().Do<DummyCommand>().Do<DummyCommand>();
 			eventBus.Dispatch<DummyEvent>();
 			Assert.AreEqual(2, DummyCommand.ExecuteCount);
@@ -37,7 +37,6 @@ namespace Bantam.Test
 		[Test]
 		public void OnCanBeCalledManyTimesForTheSameEventToCreateParallelChains()
 		{
-			DummyCommand.ExecuteCount = 0;
 			testObj.On<DummyEvent>().Do<DummyCommand>();
 			testObj.On<DummyEvent>().Do<DummyCommand>();
 			eventBus.Dispatch<DummyEvent>();
@@ -55,6 +54,14 @@ namespace Bantam.Test
 			eventBus.Dispatch<DummyEvent>(ev => ev.value = expectedValue);
 			Assert.AreEqual(expectedValue, DummyCommand.LastValue);
 		}
+
+		[Test]
+		public void CommandFailureStopsChainExecution()
+		{
+			testObj.On<DummyEvent>().Do<FailingCommand>().Do<DummyCommand>();
+			eventBus.Dispatch<DummyEvent>();
+			Assert.AreEqual(0, DummyCommand.ExecuteCount);
+		}
 	}
 
 	public class DummyCommand : Command
@@ -69,6 +76,14 @@ namespace Bantam.Test
 			ExecuteCount++;
 			LastValue = value;
 			Done();
+		}
+	}
+
+	public class FailingCommand : Command
+	{
+		public override void Execute()
+		{
+			Fail();
 		}
 	}
 }

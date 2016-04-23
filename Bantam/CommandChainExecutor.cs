@@ -30,7 +30,7 @@ namespace Bantam
 			Next();
 		}
 
-		internal void Complete()
+		internal void CurrentCommandComplete()
 		{
 			enumerator.Current.FreeCommand(pool, currentCommand);
 			currentCommand = null;
@@ -38,6 +38,13 @@ namespace Bantam
 				Next();
 			else
 				manager.CompleteChainExecution(this);
+		}
+
+		internal void CurrentCommandFailed()
+		{
+			enumerator.Current.FreeCommand(pool, currentCommand);
+			currentCommand = null;
+			manager.CompleteChainExecution(this);
 		}
 
 		private void Next()
