@@ -16,10 +16,10 @@ namespace Bantam
 			this.pool = pool;
 		}
 
-		public CommandChain On<T>() where T : class, Event, new()
+		public CommandChain<T> On<T>() where T : class, Event, new()
 		{
 			EnsureKeyExists<T>();
-			var chain = new CommandChain();
+			var chain = new CommandChain<T>();
 			chains[typeof(T)].Add(chain);
 			eventBus.AddListener<T>(ev =>
 				{
