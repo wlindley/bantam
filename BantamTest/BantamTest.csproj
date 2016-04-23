@@ -44,6 +44,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SimpleObjectPoolTest.cs" />
+    <Compile Include="ObjectPoolTest.cs" />
   </ItemGroup>
 </Project>

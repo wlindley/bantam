@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Bantam
 {
-	public class SimpleObjectPool
+	public class ObjectPool
 	{
 		private Dictionary<Type, Queue> instances = new Dictionary<Type, Queue>();
 

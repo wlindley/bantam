@@ -4,14 +4,14 @@ using NUnit.Framework;
 namespace Bantam.Test
 {
 	[TestFixture]
-	public class SimpleObjectPoolTest
+	public class ObjectPoolTest
 	{
-		private SimpleObjectPool testObj;
+		private ObjectPool testObj;
 
 		[SetUp]
 		public void SetUp()
 		{
-			testObj = new SimpleObjectPool();
+			testObj = new ObjectPool();
 		}
 
 		[Test]
