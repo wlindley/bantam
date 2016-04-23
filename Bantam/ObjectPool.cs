@@ -51,7 +51,7 @@ namespace Bantam
 				instances[type] = new Queue<Poolable>();
 		}
 
-		void ValidateType(Type type)
+		private void ValidateType(Type type)
 		{
 			if (!type.IsClass)
 				throw new InvalidTypeException();

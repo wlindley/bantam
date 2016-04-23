@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Bantam
 {
-	class CommandChainExecutor : Poolable
+	internal class CommandChainExecutor : Poolable
 	{
 		private CommandRelay manager;
 		private Event triggeringEvent;
