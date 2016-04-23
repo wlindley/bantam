@@ -50,7 +50,7 @@ namespace Bantam.Test
 			var expectedValue = 100;
 			testObj.On<DummyEvent>().Do<DummyCommand>((cmd, ev) =>
 				{
-					(cmd as DummyCommand).value = ev.value;
+					cmd.value = ev.value;
 				});
 			eventBus.Dispatch<DummyEvent>(ev => ev.value = expectedValue);
 			Assert.AreEqual(expectedValue, DummyCommand.LastValue);

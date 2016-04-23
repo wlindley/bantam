@@ -10,14 +10,14 @@ namespace Bantam
 		public abstract void InitializeCommand(Command command, Event ev);
 	}
 
-	internal class CommandTemplate<T> : CommandTemplate where T : class, Event
+	internal class CommandTemplate<T, U> : CommandTemplate where T : class, Event where U : Command
 	{
-		public Action<Command, T> initializer;
+		public Action<U, T> initializer;
 
 		public override void InitializeCommand(Command command, Event ev)
 		{
 			if (null != initializer)
-				initializer(command, ev as T);
+				initializer(command as U, ev as T);
 		}
 	}
 
@@ -30,9 +30,9 @@ namespace Bantam
 
 	public class CommandChain<T> : CommandChain where T : class, Event
 	{
-		public CommandChain<T> Do<U>(Action<Command, T> initializer = null) where U : Command
+		public CommandChain<T> Do<U>(Action<U, T> initializer = null) where U : Command
 		{
-			Commands.Add(new CommandTemplate<T> {
+			Commands.Add(new CommandTemplate<T, U> {
 				commandType = typeof(U),
 				initializer = initializer
 			});
