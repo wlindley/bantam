@@ -37,18 +37,18 @@ namespace Bantam.Test
 		}
 
 		[Test]
-		public void ReleaseAllowsObjectToBeUsedAgain()
+		public void FreeAllowsObjectToBeUsedAgain()
 		{
 			var first = testObj.Allocate<DummyType>();
-			testObj.Release<DummyType>(first);
+			testObj.Free<DummyType>(first);
 			var second = testObj.Allocate<DummyType>();
 			Assert.AreSame(first, second);
 		}
 
 		[Test]
-		public void ReleaseThrowsExceptionIfInstanceIsNull()
+		public void FreeThrowsExceptionIfInstanceIsNull()
 		{
-			Assert.Throws<NullInstanceException>(() => testObj.Release<DummyType>(null));
+			Assert.Throws<NullInstanceException>(() => testObj.Free<DummyType>(null));
 		}
 
 		[Test]
@@ -74,10 +74,10 @@ namespace Bantam.Test
 		}
 
 		[Test]
-		public void ReleaseWithTypeAllowsObjectToBeUsedAgain()
+		public void FreeWithTypeAllowsObjectToBeUsedAgain()
 		{
 			var first = testObj.Allocate(typeof(DummyType)) as DummyType;
-			testObj.Release(typeof(DummyType), first);
+			testObj.Free(typeof(DummyType), first);
 			var second = testObj.Allocate(typeof(DummyType)) as DummyType;
 			Assert.AreSame(first, second);
 		}
@@ -91,23 +91,23 @@ namespace Bantam.Test
 		}
 
 		[Test]
-		public void ReleaseWithTypeThrowsExceptionForInvalidTypes()
+		public void FreeWithTypeThrowsExceptionForInvalidTypes()
 		{
-			Assert.Throws<InvalidTypeException>(() => testObj.Release(typeof(NonPoolableType), new DummyType()));
-			Assert.Throws<InvalidTypeException>(() => testObj.Release(typeof(PoolableStruct), new PoolableStruct()));
-			Assert.Throws<InvalidTypeException>(() => testObj.Release(typeof(PoolableWithConstructor), new PoolableWithConstructor(5)));
+			Assert.Throws<InvalidTypeException>(() => testObj.Free(typeof(NonPoolableType), new DummyType()));
+			Assert.Throws<InvalidTypeException>(() => testObj.Free(typeof(PoolableStruct), new PoolableStruct()));
+			Assert.Throws<InvalidTypeException>(() => testObj.Free(typeof(PoolableWithConstructor), new PoolableWithConstructor(5)));
 		}
 
 		[Test]
-		public void ReleaseWithTypeThrowsExceptionIfInstanceIsNull()
+		public void FreeWithTypeThrowsExceptionIfInstanceIsNull()
 		{
-			Assert.Throws<NullInstanceException>(() => testObj.Release(typeof(DummyType), null));
+			Assert.Throws<NullInstanceException>(() => testObj.Free(typeof(DummyType), null));
 		}
 
 		[Test]
-		public void ReleaseWithTypeThrowsExceptionIfInstanceDoesNotMatchGivenType()
+		public void FreeWithTypeThrowsExceptionIfInstanceDoesNotMatchGivenType()
 		{
-			Assert.Throws<MismatchedTypeException>(() => testObj.Release(typeof(DummyType), new DummyEvent()));
+			Assert.Throws<MismatchedTypeException>(() => testObj.Free(typeof(DummyType), new DummyEvent()));
 		}
 	}
 

@@ -5,7 +5,7 @@ namespace Bantam
 {
 	class CommandChainExecutor : Poolable
 	{
-		private CommandManager manager;
+		private CommandRelay manager;
 		private Event triggeringEvent;
 		private List<CommandChain.CommandTemplate>.Enumerator enumerator;
 		private ObjectPool pool;
@@ -20,7 +20,7 @@ namespace Bantam
 			enumerator.Dispose();
 		}
 
-		internal void Start(Event triggeringEvent, CommandChain chain, CommandManager manager, ObjectPool pool)
+		internal void Start(Event triggeringEvent, CommandChain chain, CommandRelay manager, ObjectPool pool)
 		{
 			this.triggeringEvent = triggeringEvent;
 			this.manager = manager;
@@ -32,7 +32,7 @@ namespace Bantam
 
 		internal void Complete()
 		{
-			pool.Release(enumerator.Current.commandType, currentCommand);
+			pool.Free(enumerator.Current.commandType, currentCommand);
 			currentCommand = null;
 			if (enumerator.MoveNext())
 				Next();

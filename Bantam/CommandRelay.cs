@@ -3,14 +3,14 @@ using System.Collections.Generic;
 
 namespace Bantam
 {
-	public class CommandManager
+	public class CommandRelay
 	{
 		private EventBus eventBus;
 		private ObjectPool pool;
 		private Dictionary<Type, List<CommandChain>> chains = new Dictionary<Type, List<CommandChain>>();
 		private List<CommandChainExecutor> activeExecutors = new List<CommandChainExecutor>();
 
-		public CommandManager(EventBus eventBus, ObjectPool pool)
+		public CommandRelay(EventBus eventBus, ObjectPool pool)
 		{
 			this.eventBus = eventBus;
 			this.pool = pool;
@@ -33,7 +33,7 @@ namespace Bantam
 		internal void CompleteChainExecution(CommandChainExecutor executor)
 		{
 			activeExecutors.Remove(executor);
-			pool.Release<CommandChainExecutor>(executor);
+			pool.Free<CommandChainExecutor>(executor);
 		}
 
 		private void EnsureKeyExists<T>() where T : Event

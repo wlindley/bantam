@@ -3,9 +3,9 @@
 namespace Bantam.Test
 {
 	[TestFixture]
-	public class CommandManagerTest
+	public class CommandRelayTest
 	{
-		private CommandManager testObj;
+		private CommandRelay testObj;
 		private EventBus eventBus;
 
 		[SetUp]
@@ -13,7 +13,7 @@ namespace Bantam.Test
 		{
 			var pool = new ObjectPool();
 			eventBus = new EventBus(pool);
-			testObj = new CommandManager(eventBus, pool);
+			testObj = new CommandRelay(eventBus, pool);
 		}
 
 		[Test]

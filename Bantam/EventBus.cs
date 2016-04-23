@@ -51,7 +51,7 @@ namespace Bantam
 			
 			DispatchEvent<T>(ev);
 
-			pool.Release<T>(ev);
+			pool.Free<T>(ev);
 		}
 
 		private void EnsureKeyExists<T>() where T : Event

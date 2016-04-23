@@ -21,7 +21,7 @@ namespace Bantam
 			return GetInstance(type);
 		}
 
-		public void Release<T>(T instance) where T : Poolable
+		public void Free<T>(T instance) where T : Poolable
 		{
 			if (null == instance)
 				throw new NullInstanceException();
@@ -29,7 +29,7 @@ namespace Bantam
 			instances[typeof(T)].Enqueue(instance);
 		}
 
-		public void Release(Type type, Poolable instance)
+		public void Free(Type type, Poolable instance)
 		{
 			if (null == instance)
 				throw new NullInstanceException();
