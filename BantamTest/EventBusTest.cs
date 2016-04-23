@@ -88,12 +88,33 @@ namespace Bantam.Test
 			testObj.Dispatch<DummyEvent>();
 			Assert.IsFalse(wasCalled);
 		}
+
+		[Test]
+		public void OnceListenersForMultipleEventsAllGetCalled()
+		{
+			var wasFirstCalled = false;
+			var wasSecondCalled = false;
+			testObj.AddOnce<DummyEvent>(ev => wasFirstCalled = true);
+			testObj.AddOnce<DummyEvent2>(ev => wasSecondCalled = true);
+			testObj.Dispatch<DummyEvent>();
+			testObj.Dispatch<DummyEvent2>();
+			Assert.IsTrue(wasFirstCalled);
+			Assert.IsTrue(wasSecondCalled);
+		}
 	}
 
 	public class DummyEvent : Event
 	{
 		public int value;
 
+		public void Reset()
+		{
+			
+		}
+	}
+
+	public class DummyEvent2 : Event
+	{
 		public void Reset()
 		{
 			

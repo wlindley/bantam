@@ -36,13 +36,9 @@ namespace Bantam
 			var ev = pool.Allocate<T>();
 			if (null != initializer)
 				initializer(ev);
-			var eventListeners = listeners[typeof(T)];
-			foreach (var listener in eventListeners)
-				(listener as Action<T>)(ev);
-			var onceEventListeners = onceListeners[typeof(T)];
-			foreach (var listener in onceEventListeners)
-				(listener as Action<T>)(ev);
-			onceListeners.Clear();
+			
+			DispatchEvent<T>(ev);
+
 			pool.Release<T>(ev);
 		}
 
@@ -53,6 +49,21 @@ namespace Bantam
 				listeners[type] = new ArrayList();
 			if (!onceListeners.ContainsKey(type))
 				onceListeners[type] = new ArrayList();
+		}
+
+		private void DispatchEvent<T>(T ev) where T : Event
+		{
+			DispatchEventToListeners(ev, listeners[typeof(T)]);
+
+			var onceEventListeners = onceListeners[typeof(T)];
+			DispatchEventToListeners(ev, onceEventListeners);
+			onceEventListeners.Clear();
+		}
+
+		private void DispatchEventToListeners<T>(T ev, ArrayList eventListeners) where T : Event
+		{
+			foreach (var listener in eventListeners)
+				(listener as Action<T>)(ev);
 		}
 	}
 }
