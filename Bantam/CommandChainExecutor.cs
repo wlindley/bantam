@@ -32,7 +32,7 @@ namespace Bantam
 
 		internal void Complete()
 		{
-			pool.Free(enumerator.Current.commandType, currentCommand);
+			enumerator.Current.FreeCommand(pool, currentCommand);
 			currentCommand = null;
 			if (enumerator.MoveNext())
 				Next();
@@ -43,8 +43,7 @@ namespace Bantam
 		private void Next()
 		{
 			var template = enumerator.Current;
-			currentCommand = pool.Allocate(template.commandType) as Command;
-			template.InitializeCommand(currentCommand, triggeringEvent);
+			currentCommand = template.AllocateCommand(pool, triggeringEvent);
 			currentCommand.Start(this);
 		}
 	}
