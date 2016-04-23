@@ -18,16 +18,21 @@ namespace Bantam
 
 		internal void Start()
 		{
-			currentCommand = Activator.CreateInstance(enumerator.Current.commandType) as Command;
-			currentCommand.Start(this);
+			Next();
 		}
 
 		internal void Complete()
 		{
 			if (enumerator.MoveNext())
-				Start();
+				Next();
 			else
 				manager.CompleteChainExecution(this);
+		}
+
+		private void Next()
+		{
+			currentCommand = Activator.CreateInstance(enumerator.Current.commandType) as Command;
+			currentCommand.Start(this);
 		}
 	}
 }
