@@ -45,5 +45,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ObjectPoolTest.cs" />
+    <Compile Include="EventBusTest.cs" />
   </ItemGroup>
 </Project>

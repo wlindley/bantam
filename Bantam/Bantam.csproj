@@ -34,6 +34,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Poolable.cs" />
     <Compile Include="ObjectPool.cs" />
+    <Compile Include="EventBus.cs" />
+    <Compile Include="Event.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
