@@ -75,7 +75,6 @@ namespace Bantam.Test
 		{
 			ExecuteCount++;
 			LastValue = value;
-			Done();
 		}
 	}
 

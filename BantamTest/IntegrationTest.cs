@@ -138,6 +138,7 @@ namespace Bantam.Test
 		public override void Execute()
 		{
 			server.LoginComplete += OnLoginComplete;
+			Retain();
 		}
 
 		public override void Reset()
@@ -174,7 +175,6 @@ namespace Bantam.Test
 		public override void Execute()
 		{
 			userService.currentUser = loginEvent.username;
-			Done();
 		}
 
 		public override void Reset()
@@ -193,7 +193,6 @@ namespace Bantam.Test
 		public override void Execute()
 		{
 			userWidget.SetName(userService.currentUser);
-			Done();
 		}
 
 		public override void Reset()
