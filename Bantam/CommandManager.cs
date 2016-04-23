@@ -25,7 +25,7 @@ namespace Bantam
 				{
 					var executor = pool.Allocate<CommandChainExecutor>();
 					activeExecutors.Add(executor);
-					executor.Start(ev, chain, this);
+					executor.Start(ev, chain, this, pool);
 				});
 			return chain;
 		}
