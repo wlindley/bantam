@@ -12,10 +12,7 @@ namespace Bantam
 	{
 		public CommandChain<T> Do<U>(Action<U, T> initializer = null) where U : Command, new()
 		{
-			Commands.Add(new CommandTemplate<T, U> {
-				commandType = typeof(U),
-				initializer = initializer
-			});
+			Commands.Add(new CommandTemplate<T, U>(initializer));
 			return this;
 		}
 	}

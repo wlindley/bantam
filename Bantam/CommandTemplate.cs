@@ -2,19 +2,22 @@
 
 namespace Bantam
 {
-	internal abstract class CommandTemplate
+	internal interface CommandTemplate
 	{
-		public Type commandType;
-
-		public abstract Command AllocateCommand(ObjectPool pool, Event ev);
-		public abstract void FreeCommand(ObjectPool pool, Command command);
+		Command AllocateCommand(ObjectPool pool, Event ev);
+		void FreeCommand(ObjectPool pool, Command command);
 	}
 
 	internal class CommandTemplate<T, U> : CommandTemplate where T : class, Event where U : Command, new()
 	{
-		public Action<U, T> initializer;
+		private Action<U, T> initializer;
 
-		public override Command AllocateCommand(ObjectPool pool, Event ev)
+		public CommandTemplate(Action<U, T> initializer = null)
+		{
+			this.initializer = initializer;
+		}
+
+		public Command AllocateCommand(ObjectPool pool, Event ev)
 		{
 			var command = pool.Allocate<U>();
 			if (null != initializer)
@@ -22,7 +25,7 @@ namespace Bantam
 			return command;
 		}
 
-		public override void FreeCommand(ObjectPool pool, Command command)
+		public void FreeCommand(ObjectPool pool, Command command)
 		{
 			pool.Free<U>(command as U);
 		}
