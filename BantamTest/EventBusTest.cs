@@ -70,7 +70,7 @@ namespace Bantam.Test
 		public void RemoveListenerStopsEventsFromBeingDispatchedToThatListener()
 		{
 			var callCount = 0;
-			var listener = new Action<DummyEvent>((DummyEvent ev) => callCount++);
+			var listener = new Action<DummyEvent>(ev => callCount++);
 			testObj.AddListener(listener);
 			testObj.Dispatch<DummyEvent>();
 			testObj.RemoveListener<DummyEvent>(listener);
