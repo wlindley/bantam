@@ -101,6 +101,27 @@ namespace Bantam.Test
 			Assert.IsTrue(wasFirstCalled);
 			Assert.IsTrue(wasSecondCalled);
 		}
+
+		[Test]
+		public void AddListenerForAllCausesListenerToBeCalledForAllEvents()
+		{
+			var callCount = 0;
+			testObj.AddListenerForAll(ev => callCount++);
+			testObj.Dispatch<DummyEvent>();
+			testObj.Dispatch<DummyEvent2>();
+			Assert.AreEqual(2, callCount);
+		}
+
+		[Test]
+		public void RemoveListenerPreventsEventsFromGoingToAnAllListener()
+		{
+			var wasCalled = false;
+			var listener = new Action<Event>(ev => wasCalled = true);
+			testObj.AddListenerForAll(listener);
+			testObj.RemoveListener<Event>(listener);
+			testObj.Dispatch<DummyEvent>();
+			Assert.IsFalse(wasCalled);
+		}
 	}
 
 	public class DummyEvent : Event

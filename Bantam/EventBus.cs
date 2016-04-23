@@ -8,6 +8,7 @@ namespace Bantam
 	{
 		private Dictionary<Type, ArrayList> listeners = new Dictionary<Type, ArrayList>();
 		private Dictionary<Type, ArrayList> onceListeners = new Dictionary<Type, ArrayList>();
+		private ArrayList allListeners = new ArrayList();
 		private ObjectPool pool = new ObjectPool();
 
 		public void AddListener<T>(Action<T> listener) where T : class, Event, new()
@@ -22,12 +23,18 @@ namespace Bantam
 			onceListeners[typeof(T)].Add(listener);
 		}
 
-		public void RemoveListener<T>(Action<T> listener) where T : class, Event, new()
+		public void AddListenerForAll(Action<Event> listener)
+		{
+			allListeners.Add(listener);
+		}
+
+		public void RemoveListener<T>(Action<T> listener) where T : class, Event
 		{
 			EnsureKeyExists<T>();
 			var type = typeof(T);
 			listeners[type].Remove(listener);
 			onceListeners[type].Remove(listener);
+			allListeners.Remove(listener);
 		}
 
 		public void Dispatch<T>(Action<T> initializer = null) where T : class, Event, new()
@@ -58,6 +65,8 @@ namespace Bantam
 			var onceEventListeners = onceListeners[typeof(T)];
 			DispatchEventToListeners(ev, onceEventListeners);
 			onceEventListeners.Clear();
+
+			DispatchEventToListeners(ev, allListeners);
 		}
 
 		private void DispatchEventToListeners<T>(T ev, ArrayList eventListeners) where T : Event
