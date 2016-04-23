@@ -22,13 +22,10 @@ namespace Bantam.Test
 		}
 
 		[Test]
-		public void AllocateUsesProvidedInitializer()
+		public void AllocateResetsObjectItReturns()
 		{
-			var instance = testObj.Allocate<DummyType>((obj) =>
-			{
-				obj.value = 5;
-			});
-			Assert.AreEqual(5, instance.value);
+			var instance = testObj.Allocate<DummyType>();
+			Assert.AreEqual(0, instance.value);
 		}
 
 		[Test]
@@ -49,8 +46,13 @@ namespace Bantam.Test
 		}
 	}
 
-	public class DummyType
+	public class DummyType : Poolable
 	{
-		public int value;
+		public int value = -1;
+
+		public void Reset()
+		{
+			value = 0;
+		}
 	}
 }

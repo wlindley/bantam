@@ -8,12 +8,10 @@ namespace Bantam
 	{
 		private Dictionary<Type, Queue> instances = new Dictionary<Type, Queue>();
 
-		public T Allocate<T>(Action<T> initializer = null) where T : class, new()
+		public T Allocate<T>() where T : class, Poolable, new()
 		{
 			EnsurePoolExists<T>();
 			var instance = GetInstance<T>();
-			if (null != initializer)
-				initializer(instance);
 			return instance;
 		}
 
@@ -30,7 +28,7 @@ namespace Bantam
 				instances[type] = new Queue();
 		}
 
-		private T GetInstance<T>() where T : class, new()
+		private T GetInstance<T>() where T : class, Poolable, new()
 		{
 			T instance;
 			var type = typeof(T);
@@ -38,6 +36,7 @@ namespace Bantam
 				instance = instances[type].Dequeue() as T;
 			else
 				instance = new T();
+			instance.Reset();
 			return instance;
 		}
 	}
