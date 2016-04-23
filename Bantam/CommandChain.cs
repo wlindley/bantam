@@ -8,15 +8,16 @@ namespace Bantam
 		internal struct CommandTemplate
 		{
 			public Type commandType;
-			public Action<Command> initializer;
+			public Action<Command, Event> initializer;
 		}
 
 		internal List<CommandTemplate> Commands = new List<CommandTemplate>();
 
-		public CommandChain Do<U>() where U : Command
+		public CommandChain Do<U>(Action<Command, Event> initializer = null) where U : Command
 		{
 			Commands.Add(new CommandTemplate {
-				commandType = typeof(U)
+				commandType = typeof(U),
+				initializer = initializer
 			});
 			return this;
 		}

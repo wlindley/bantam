@@ -6,7 +6,7 @@ namespace Bantam
 	public class CommandManager
 	{
 		private EventBus eventBus;
-		private Dictionary<Type, CommandChain> chains = new Dictionary<Type, CommandChain>();
+		private Dictionary<Type, List<CommandChain>> chains = new Dictionary<Type, List<CommandChain>>();
 		private List<CommandChainExecutor> activeExecutors = new List<CommandChainExecutor>();
 
 		public CommandManager(EventBus eventBus)
@@ -16,13 +16,14 @@ namespace Bantam
 
 		public CommandChain On<T>() where T : class, Event, new()
 		{
+			EnsureKeyExists<T>();
 			var chain = new CommandChain();
-			chains[typeof(T)] = chain;
+			chains[typeof(T)].Add(chain);
 			eventBus.AddListener<T>(ev =>
 				{
 					var executor = new CommandChainExecutor(chain, this);
 					activeExecutors.Add(executor);
-					executor.Start();
+					executor.Start(ev);
 				});
 			return chain;
 		}
@@ -30,6 +31,13 @@ namespace Bantam
 		internal void CompleteChainExecution(CommandChainExecutor executor)
 		{
 			activeExecutors.Remove(executor);
+		}
+
+		private void EnsureKeyExists<T>() where T : Event
+		{
+			var type = typeof(T);
+			if (!chains.ContainsKey(type))
+				chains[type] = new List<CommandChain>();
 		}
 	}
 }

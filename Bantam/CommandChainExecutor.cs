@@ -8,6 +8,7 @@ namespace Bantam
 		private CommandManager manager;
 		private List<CommandChain.CommandTemplate>.Enumerator enumerator;
 		private Command currentCommand;
+		private Event triggeringEvent;
 
 		public CommandChainExecutor(CommandChain chain, CommandManager manager)
 		{
@@ -16,8 +17,9 @@ namespace Bantam
 			enumerator.MoveNext();
 		}
 
-		internal void Start()
+		internal void Start(Event ev)
 		{
+			triggeringEvent = ev;
 			Next();
 		}
 
@@ -31,7 +33,10 @@ namespace Bantam
 
 		private void Next()
 		{
-			currentCommand = Activator.CreateInstance(enumerator.Current.commandType) as Command;
+			var template = enumerator.Current;
+			currentCommand = Activator.CreateInstance(template.commandType) as Command;
+			if (null != template.initializer)
+				template.initializer(currentCommand, triggeringEvent);
 			currentCommand.Start(this);
 		}
 	}
