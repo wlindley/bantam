@@ -1,7 +1,6 @@
-[![Build Status](https://travis-ci.org/wlindley/bantam.svg?branch=master)](https://travis-ci.org/wlindley/bantam)
-
 # Bantam
 A lightweight, no garbage application framework for C# that's compatible with Unity.
+[![Build Status](https://travis-ci.org/wlindley/bantam.svg?branch=master)](https://travis-ci.org/wlindley/bantam)
 
 ## Features
 1. **Object Pool** can be used with generic type parameters or Type object parameters. Pools expose the number of instances of each type they have created to aid with debugging and profiling.
