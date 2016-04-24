@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/wlindley/bantam.svg?branch=master)](https://travis-ci.org/wlindley/bantam)
+
 # Bantam
 A lightweight, no garbage application framework for C# that's compatible with Unity.
 
