@@ -1,7 +1,20 @@
 language: csharp
 solution: Bantam.sln
+
 before_install:
   - sudo apt-get install nunit-console
+
 script:
   - xbuild /p:Configuration=Debug Bantam.sln
   - nunit-console BantamTest/bin/Debug/BantamTest.dll
+
+deploy:
+  provider: releases
+  api_key: ""
+  file:
+    - "Bantam/bin/Debug/Bantam.dll"
+    - "LICENSE"
+    - "README.md"
+  skip_cleanup: true
+  on:
+    tags: true
