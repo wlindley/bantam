@@ -10,9 +10,9 @@ namespace Bantam
 
 	internal class CommandAllocator<T, U> : CommandAllocator where T : class, Event where U : Command, new()
 	{
-		private Action<U, T> initializer;
+		private CommandInitializer<U, T> initializer;
 
-		public CommandAllocator(Action<U, T> initializer = null)
+		public CommandAllocator(CommandInitializer<U, T> initializer = null)
 		{
 			this.initializer = initializer;
 		}

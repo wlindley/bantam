@@ -70,7 +70,7 @@ namespace Bantam.Test
 		public void RemoveListenerStopsEventsFromBeingDispatchedToThatListener()
 		{
 			var callCount = 0;
-			var listener = new Action<DummyEvent>(ev => callCount++);
+			var listener = new EventListener<DummyEvent>(ev => callCount++);
 			testObj.AddListener(listener);
 			testObj.Dispatch<DummyEvent>();
 			testObj.RemoveListener<DummyEvent>(listener);
@@ -82,7 +82,7 @@ namespace Bantam.Test
 		public void RemoveListenerPreventsCallToOnceListener()
 		{
 			var wasCalled = false;
-			var listener = new Action<DummyEvent>(ev => wasCalled = true);
+			var listener = new EventListener<DummyEvent>(ev => wasCalled = true);
 			testObj.AddOnce(listener);
 			testObj.RemoveListener(listener);
 			testObj.Dispatch<DummyEvent>();
@@ -116,7 +116,7 @@ namespace Bantam.Test
 		public void RemoveListenerPreventsEventsFromGoingToAnAllListener()
 		{
 			var wasCalled = false;
-			var listener = new Action<Event>(ev => wasCalled = true);
+			var listener = new EventListener<Event>(ev => wasCalled = true);
 			testObj.AddListenerForAll(listener);
 			testObj.RemoveListener<Event>(listener);
 			testObj.Dispatch<DummyEvent>();

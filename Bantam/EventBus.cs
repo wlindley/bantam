@@ -4,6 +4,9 @@ using System.Collections.Generic;
 
 namespace Bantam
 {
+	public delegate void EventListener<T>(T evt) where T : Event;
+	public delegate void EventInitializer<T>(T evt) where T : Event;
+
 	public class EventBus
 	{
 		private Dictionary<Type, ArrayList> listeners = new Dictionary<Type, ArrayList>();
@@ -16,24 +19,24 @@ namespace Bantam
 			this.pool = pool;
 		}
 
-		public void AddListener<T>(Action<T> listener) where T : class, Event, new()
+		public void AddListener<T>(EventListener<T> listener) where T : class, Event, new()
 		{
 			EnsureKeyExists<T>();
 			listeners[typeof(T)].Add(listener);
 		}
 
-		public void AddOnce<T>(Action<T> listener) where T : class, Event, new()
+		public void AddOnce<T>(EventListener<T> listener) where T : class, Event, new()
 		{
 			EnsureKeyExists<T>();
 			onceListeners[typeof(T)].Add(listener);
 		}
 
-		public void AddListenerForAll(Action<Event> listener)
+		public void AddListenerForAll(EventListener<Event> listener)
 		{
 			allListeners.Add(listener);
 		}
 
-		public void RemoveListener<T>(Action<T> listener) where T : class, Event
+		public void RemoveListener<T>(EventListener<T> listener) where T : class, Event
 		{
 			EnsureKeyExists<T>();
 			var type = typeof(T);
@@ -42,7 +45,7 @@ namespace Bantam
 			allListeners.Remove(listener);
 		}
 
-		public void Dispatch<T>(Action<T> initializer = null) where T : class, Event, new()
+		public void Dispatch<T>(EventInitializer<T> initializer = null) where T : class, Event, new()
 		{
 			EnsureKeyExists<T>();
 			var ev = pool.Allocate<T>();
@@ -65,19 +68,19 @@ namespace Bantam
 
 		private void DispatchEvent<T>(T ev) where T : Event
 		{
-			DispatchEventToListeners(ev, listeners[typeof(T)]);
+			DispatchEventToListeners<T>(ev, listeners[typeof(T)]);
 
 			var onceEventListeners = onceListeners[typeof(T)];
-			DispatchEventToListeners(ev, onceEventListeners);
+			DispatchEventToListeners<T>(ev, onceEventListeners);
 			onceEventListeners.Clear();
 
-			DispatchEventToListeners(ev, allListeners);
+			DispatchEventToListeners<Event>(ev, allListeners);
 		}
 
 		private void DispatchEventToListeners<T>(T ev, ArrayList eventListeners) where T : Event
 		{
 			foreach (var listener in eventListeners)
-				(listener as Action<T>)(ev);
+				(listener as EventListener<T>)(ev);
 		}
 	}
 }
