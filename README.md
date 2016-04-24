@@ -1,5 +1,5 @@
-# bantam
-A lightweight application framework for C#.
+# Bantam
+A lightweight, no garbage application framework for C# that's compatible with Unity.
 
 ## Features
 1. **Object Pool** can be used with generic type parameters or Type object parameters. Pools expose the number of instances of each type they have created to aid with debugging and profiling.
