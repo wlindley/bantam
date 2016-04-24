@@ -2,9 +2,6 @@ language: csharp
 solution: Bantam.sln
 before_install:
   - sudo apt-get install nunit-console
-before_script:
-  - nuget restore Bantam.sln
 script:
   - xbuild /p:Configuration=Debug Bantam.sln
-after_script:
   - nunit-console BantamTest/bin/Debug/BantamTest.dll
