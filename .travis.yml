@@ -10,11 +10,13 @@ script:
 
 deploy:
   provider: releases
-  api_key: ""
-  file:
-    - "Bantam/bin/Debug/Bantam.dll"
-    - "LICENSE"
-    - "README.md"
+  api_key:
+    secure: y6v0TUgoO9hhwfsTnEFxi8k4MAa6RyG3jQaR9f8a3DmLyGaoAIK7bFQqgVRTK/XeNIIJsS7P4FBMmSrm+cxEbB27rKF9te0ep1YRCwEN5DNnV7+7pL/y6g9K7hwaLUE7q4ztmZzg+qaIPgtk/AQOxeK9KeHjFCvZ324C95OMaeao5afioOtOUfFjC1WxRewcRya/NyEyntoPmqZCKfcxCGJGs3MjCy2watHEJZCb2svzDk1KGRRYzkHJkzxkuKYkIkHh8n8DSNd2v+rchwb52Q5hlQJrtbtbgrvoZhI9Maz2g57CBnTQmJ1QgERrvp3L/ARPKOzPo+DEppQzPYzH2IEmLjst4AYZxcQYIzvx3GZfkC3zvsb8zIMH+zqWm74vcIhRZ8iT09oyuQCTE5IE5uDveusNNlQGlgre9jRzZqqen9inAkRPWowmAdNC183Lkor6Yiw1yZcYGfIDp0Sza9F9KuU2nGMGV0a8DHLbDVsaE+aPYwbIqc7KzzcuFuF+ElxQUUc4xTHXmV6Y45I7tg5Z/KLNVRukz09mdwyCUuFr46TlmSVo4zElMVPw+i81W10QwfT0nncTndMmvGXfIdRI93KhE8RP8sxou4jwMAGAFsLmgbbMjrb+RPuGV+/bfD3SryU/FDkGuZK3pFNWQ+CNFEIuImRzsuWxVvfksgA=
   skip_cleanup: true
+  file:
+    - Bantam/bin/Debug/Bantam.dll
+    - LICENSE
+    - README.md
   on:
+    repo: wlindley/bantam
     tags: true
