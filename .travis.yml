@@ -7,4 +7,4 @@ before_script:
 script:
   - xbuild /p:Configuration=Debug Bantam.sln
 after_script:
-  - nunit-console BantamTests/bin/Debug/BantamTest.dll
+  - nunit-console BantamTest/bin/Debug/BantamTest.dll
