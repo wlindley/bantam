@@ -19,4 +19,5 @@ deploy:
     - README.md
   on:
     repo: wlindley/bantam
+    branch: releases
     tags: true
