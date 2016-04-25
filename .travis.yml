@@ -5,8 +5,8 @@ before_install:
   - sudo apt-get install nunit-console
 
 script:
-  - xbuild /p:Configuration=Debug Bantam.sln
-  - nunit-console BantamTest/bin/Debug/BantamTest.dll
+  - xbuild /p:Configuration=Release Bantam.sln
+  - nunit-console BantamTest/bin/Release/BantamTest.dll
 
 deploy:
   provider: releases
