@@ -41,6 +41,10 @@
     <Compile Include="CommandChainExecutor.cs" />
     <Compile Include="CommandRelay.cs" />
     <Compile Include="CommandAllocator.cs" />
+    <Compile Include="ModelRegistry.cs" />
+    <Compile Include="Model.cs" />
+    <Compile Include="ModelCreatedEvent.cs" />
+    <Compile Include="ModelDestroyedEvent.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
