@@ -48,5 +48,6 @@
     <Compile Include="EventBusTest.cs" />
     <Compile Include="CommandRelayTest.cs" />
     <Compile Include="IntegrationTest.cs" />
+    <Compile Include="ModelRegistryTest.cs" />
   </ItemGroup>
 </Project>
