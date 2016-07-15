@@ -4,6 +4,7 @@ using System.Collections.Generic;
 namespace Bantam
 {
 	public delegate void CommandInitializer<U, T>(U cmd, T evt) where U : Command where T : Event;
+	public delegate void SimpleCommandInitializer<U>(U cmd) where U : Command;
 
 	public abstract class CommandChain
 	{
