@@ -3,7 +3,49 @@ using System.Collections.Generic;
 
 namespace Bantam
 {
-	internal class CommandChainExecutor : Poolable
+	internal interface CommandChainExecutor : Poolable
+	{
+		void CurrentCommandComplete();
+		void CurrentCommandFailed();
+	}
+
+	internal class SimpleCommandChainExecutor<T> : CommandChainExecutor where T : Command, new()
+	{
+		private CommandRelay manager;
+		private ObjectPool pool;
+		private T command;
+
+		public void Reset()
+		{
+			manager = null;
+			pool = null;
+			command = null;
+		}
+
+		internal void Start(CommandRelay manager, ObjectPool pool, SimpleCommandInitializer<T> initializer = null)
+		{
+			this.manager = manager;
+			this.pool = pool;
+			command = pool.Allocate<T>();
+			if (null != initializer)
+				initializer(command);
+			command.Start(this);
+		}
+
+		public void CurrentCommandComplete()
+		{
+			pool.Free<T>(command);
+			manager.CompleteChainExecution<SimpleCommandChainExecutor<T>>(this);
+		}
+
+		public void CurrentCommandFailed()
+		{
+			pool.Free<T>(command);
+			manager.CompleteChainExecution<SimpleCommandChainExecutor<T>>(this);
+		}
+	}
+
+	internal class EventCommandChainExecutor : CommandChainExecutor
 	{
 		private CommandRelay manager;
 		private Event triggeringEvent;
@@ -30,21 +72,21 @@ namespace Bantam
 			Next();
 		}
 
-		internal void CurrentCommandComplete()
+		public void CurrentCommandComplete()
 		{
 			enumerator.Current.FreeCommand(pool, currentCommand);
 			currentCommand = null;
 			if (enumerator.MoveNext())
 				Next();
 			else
-				manager.CompleteChainExecution(this);
+				manager.CompleteChainExecution<EventCommandChainExecutor>(this);
 		}
 
-		internal void CurrentCommandFailed()
+		public void CurrentCommandFailed()
 		{
 			enumerator.Current.FreeCommand(pool, currentCommand);
 			currentCommand = null;
-			manager.CompleteChainExecution(this);
+			manager.CompleteChainExecution<EventCommandChainExecutor>(this);
 		}
 
 		private void Next()

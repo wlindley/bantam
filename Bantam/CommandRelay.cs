@@ -23,17 +23,24 @@ namespace Bantam
 			chains[typeof(T)].Add(chain);
 			eventBus.AddListener<T>(ev =>
 				{
-					var executor = pool.Allocate<CommandChainExecutor>();
+					var executor = pool.Allocate<EventCommandChainExecutor>();
 					activeExecutors.Add(executor);
 					executor.Start(ev, chain, this, pool);
 				});
 			return chain;
 		}
 
-		internal void CompleteChainExecution(CommandChainExecutor executor)
+		public void Launch<U>(SimpleCommandInitializer<U> initializer = null) where U : Command, new()
+		{
+			var executor = pool.Allocate<SimpleCommandChainExecutor<U>>();
+			activeExecutors.Add(executor);
+			executor.Start(this, pool, initializer);
+		}
+
+		internal void CompleteChainExecution<V>(V executor) where V : CommandChainExecutor
 		{
 			activeExecutors.Remove(executor);
-			pool.Free<CommandChainExecutor>(executor);
+			pool.Free<V>(executor);
 		}
 
 		private void EnsureKeyExists<T>() where T : Event

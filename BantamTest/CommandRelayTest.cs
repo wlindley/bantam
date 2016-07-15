@@ -62,6 +62,20 @@ namespace Bantam.Test
 			eventBus.Dispatch<DummyEvent>();
 			Assert.AreEqual(0, DummyCommand.ExecuteCount);
 		}
+
+		[Test]
+		public void LaunchCreatesCommandDirectly()
+		{
+			testObj.Launch<DummyCommand>();
+			Assert.AreEqual(1, DummyCommand.ExecuteCount);
+		}
+
+		[Test]
+		public void LaunchRunsInitializerOnCommandIfProvided()
+		{
+			testObj.Launch<DummyCommand>(cmd => cmd.value = 7500);
+			Assert.AreEqual(7500, DummyCommand.LastValue);
+		}
 	}
 
 	public class DummyCommand : Command
