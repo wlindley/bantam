@@ -79,8 +79,9 @@ namespace Bantam
 
 		private void DispatchEventToListeners<T>(T ev, ArrayList eventListeners) where T : Event
 		{
-			foreach (var listener in eventListeners)
-				(listener as EventListener<T>)(ev);
+			var numListeners = eventListeners.Count;
+			for (var i = 0; i < numListeners; i++)
+				(eventListeners[i] as EventListener<T>)(ev);
 		}
 	}
 }
