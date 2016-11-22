@@ -50,6 +50,8 @@ namespace Bantam
 		private CommandRelay manager;
 		private Event triggeringEvent;
 		private List<CommandAllocator>.Enumerator enumerator;
+		private CommandAllocator failureAllocator;
+		private CommandAllocator currentAllocator;
 		private ObjectPool pool;
 		private Command currentCommand;
 
@@ -60,6 +62,8 @@ namespace Bantam
 			currentCommand = null;
 			pool = null;
 			enumerator.Dispose();
+			failureAllocator = null;
+			currentAllocator = null;
 		}
 
 		internal void Start(Event triggeringEvent, CommandChain chain, CommandRelay manager, ObjectPool pool)
@@ -67,6 +71,7 @@ namespace Bantam
 			this.triggeringEvent = triggeringEvent;
 			this.manager = manager;
 			this.pool = pool;
+			failureAllocator = chain.FailureCommand;
 			enumerator = chain.Commands.GetEnumerator();
 			enumerator.MoveNext();
 			Next();
@@ -74,7 +79,7 @@ namespace Bantam
 
 		public void CurrentCommandComplete()
 		{
-			enumerator.Current.FreeCommand(pool, currentCommand);
+			currentAllocator.FreeCommand(pool, currentCommand);
 			currentCommand = null;
 			if (enumerator.MoveNext())
 				Next();
@@ -84,14 +89,30 @@ namespace Bantam
 
 		public void CurrentCommandFailed()
 		{
-			enumerator.Current.FreeCommand(pool, currentCommand);
+			currentAllocator.FreeCommand(pool, currentCommand);
 			currentCommand = null;
-			manager.CompleteChainExecution<EventCommandChainExecutor>(this);
+			if (null != failureAllocator)
+				ExecuteFailureCommand();
+			else
+				manager.CompleteChainExecution<EventCommandChainExecutor>(this);
 		}
 
 		private void Next()
 		{
-			currentCommand = enumerator.Current.AllocateCommand(pool, triggeringEvent);
+			currentAllocator = enumerator.Current;
+			StartCommandFromCurrentAllocator();
+		}
+
+		private void ExecuteFailureCommand()
+		{
+			currentAllocator = failureAllocator;
+			failureAllocator = null;
+			StartCommandFromCurrentAllocator();
+		}
+
+		void StartCommandFromCurrentAllocator()
+		{
+			currentCommand = currentAllocator.AllocateCommand(pool, triggeringEvent);
 			currentCommand.Start(this);
 		}
 	}

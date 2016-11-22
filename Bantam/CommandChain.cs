@@ -9,6 +9,7 @@ namespace Bantam
 	public abstract class CommandChain
 	{
 		internal List<CommandAllocator> Commands = new List<CommandAllocator>();
+		internal CommandAllocator FailureCommand;
 	}
 
 	public class CommandChain<T> : CommandChain where T : class, Event
@@ -17,6 +18,11 @@ namespace Bantam
 		{
 			Commands.Add(new CommandAllocator<T, U>(initializer));
 			return this;
+		}
+
+		public void OnFailure<U>(CommandInitializer<U, T> initializer = null) where U : Command, new()
+		{
+			FailureCommand = new CommandAllocator<T, U>(initializer);
 		}
 	}
 }
