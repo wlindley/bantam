@@ -12,11 +12,14 @@ namespace Bantam
 		private Dictionary<Type, ArrayList> listeners = new Dictionary<Type, ArrayList>();
 		private Dictionary<Type, ArrayList> onceListeners = new Dictionary<Type, ArrayList>();
 		private ArrayList allListeners = new ArrayList();
+		private ArrayList toRemove = new ArrayList();
+		private ArrayList currentlyDispatching;
 		private ObjectPool pool;
 
 		public EventBus(ObjectPool pool)
 		{
 			this.pool = pool;
+			currentlyDispatching = null;
 		}
 
 		public void AddListener<T>(EventListener<T> listener) where T : class, Event, new()
@@ -40,9 +43,7 @@ namespace Bantam
 		{
 			EnsureKeyExists<T>();
 			var type = typeof(T);
-			listeners[type].Remove(listener);
-			onceListeners[type].Remove(listener);
-			allListeners.Remove(listener);
+			SafeRemoveFromAll(listener, type);
 		}
 
 		public void Dispatch<T>(EventInitializer<T> initializer = null) where T : class, Event, new()
@@ -60,6 +61,7 @@ namespace Bantam
 		private void EnsureKeyExists<T>() where T : Event
 		{
 			var type = typeof(T);
+
 			if (!listeners.ContainsKey(type))
 				listeners[type] = new ArrayList();
 			if (!onceListeners.ContainsKey(type))
@@ -79,9 +81,36 @@ namespace Bantam
 
 		private void DispatchEventToListeners<T>(T ev, ArrayList eventListeners) where T : Event
 		{
+			currentlyDispatching = eventListeners;
 			var numListeners = eventListeners.Count;
 			for (var i = 0; i < numListeners; i++)
 				(eventListeners[i] as EventListener<T>)(ev);
+			currentlyDispatching = null;
+
+			ProcessRemovals(eventListeners);
+		}
+
+		private void ProcessRemovals(ArrayList eventListeners)
+		{
+			var numToRemove = toRemove.Count;
+			for (var i = 0; i < numToRemove; i++)
+				eventListeners.Remove(toRemove[i]);
+			toRemove.Clear();
+		}
+
+		private void SafeRemoveFromAll(object listener, Type type)
+		{
+			SafeRemoveFromList(listener, listeners[type]);
+			SafeRemoveFromList(listener, onceListeners[type]);
+			SafeRemoveFromList(listener, allListeners);
+		}
+
+		private void SafeRemoveFromList(object listener, ArrayList list)
+		{
+			if (list != currentlyDispatching)
+				list.Remove(listener);
+			else
+				toRemove.Add(listener);
 		}
 	}
 }
