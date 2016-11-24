@@ -29,6 +29,11 @@ commandRelay.On<LoginEvent>()
 	.Do<ShowUsernameCommand>((cmd, evt) => cmd.loginEvent = evt)
 	.Do<ShowOptionsCommand>();
 
+//Handle a failed command chain
+commandRelay.On<UserDataRequestEvent>()
+	.Do<FailingCommand>()
+	.OnFailure<ResetUserDataCommand>();
+
 //Create a Model.
 modelRegistry.Create<UserDataModel>(mdl => mdl.username = "Jane Doe");
 ```

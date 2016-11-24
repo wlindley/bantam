@@ -76,6 +76,33 @@ namespace Bantam.Test
 			testObj.Launch<DummyCommand>(cmd => cmd.value = 7500);
 			Assert.AreEqual(7500, DummyCommand.LastValue);
 		}
+
+		[Test]
+		public void OnFailureExecutesCommandWhenChainFails()
+		{
+			testObj.On<DummyEvent>().Do<FailingCommand>().OnFailure<DummyCommand>();
+			eventBus.Dispatch<DummyEvent>();
+			Assert.AreEqual(1, DummyCommand.ExecuteCount);
+		}
+
+		[Test]
+		public void OnFailureCommandCanFailWithoutCreatingInfiniteRecursion()
+		{
+			testObj.On<DummyEvent>().Do<FailingCommand>().OnFailure<FailingCommand>();
+			eventBus.Dispatch<DummyEvent>();
+		}
+
+		[Test]
+		public void OnFailureCanTakeAnOptionalInitializerForCommand()
+		{
+			var expectedValue = 55;
+			testObj.On<DummyEvent>().Do<FailingCommand>().OnFailure<DummyCommand>((cmd, evt) =>
+				{
+					cmd.value = evt.value;
+				});
+			eventBus.Dispatch<DummyEvent>(evt => evt.value = expectedValue);
+			Assert.AreEqual(expectedValue, DummyCommand.LastValue);
+		}
 	}
 
 	public class DummyCommand : Command
