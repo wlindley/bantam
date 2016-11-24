@@ -139,6 +139,23 @@ namespace Bantam.Test
 
 			Assert.IsTrue(wasSecondListenerCalled, "Second listener was not executed.");
 		}
+
+		[Test]
+		public void RemoveListenerSucceedsWhenCalledFromOnceHandlerForEvent()
+		{
+			var wasSecondListenerCalled = false;
+			Action action = () => {};
+			var listener = new EventListener<DummyEvent>(evt => action());
+			action = () => {
+				testObj.RemoveListener<DummyEvent>(listener);
+			};
+			testObj.AddOnce<DummyEvent>(listener);
+			testObj.AddOnce<DummyEvent>(evt => wasSecondListenerCalled = true);
+
+			testObj.Dispatch<DummyEvent>();
+
+			Assert.IsTrue(wasSecondListenerCalled, "Second listener was not executed.");
+		}
 	}
 
 	public class DummyEvent : Event
