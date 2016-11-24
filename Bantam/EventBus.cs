@@ -13,14 +13,13 @@ namespace Bantam
 		private Dictionary<Type, ArrayList> onceListeners = new Dictionary<Type, ArrayList>();
 		private ArrayList allListeners = new ArrayList();
 		private ArrayList toRemove = new ArrayList();
-		private List<Type> keyList = new List<Type>();
+		private ArrayList currentlyDispatching;
 		private ObjectPool pool;
-		private bool isDispatching;
 
 		public EventBus(ObjectPool pool)
 		{
 			this.pool = pool;
-			isDispatching = false;
+			currentlyDispatching = null;
 		}
 
 		public void AddListener<T>(EventListener<T> listener) where T : class, Event, new()
@@ -44,10 +43,7 @@ namespace Bantam
 		{
 			EnsureKeyExists<T>();
 			var type = typeof(T);
-			if (isDispatching)
-				toRemove.Add(listener);
-			else
-				RemoveListener(listener, type);
+			SafeRemoveFromAll(listener, type);
 		}
 
 		public void Dispatch<T>(EventInitializer<T> initializer = null) where T : class, Event, new()
@@ -66,12 +62,10 @@ namespace Bantam
 		{
 			var type = typeof(T);
 
-			if (!keyList.Contains(type))
-			{
-				keyList.Add(type);
+			if (!listeners.ContainsKey(type))
 				listeners[type] = new ArrayList();
+			if (!onceListeners.ContainsKey(type))
 				onceListeners[type] = new ArrayList();
-			}
 		}
 
 		private void DispatchEvent<T>(T ev) where T : Event
@@ -87,29 +81,36 @@ namespace Bantam
 
 		private void DispatchEventToListeners<T>(T ev, ArrayList eventListeners) where T : Event
 		{
-			isDispatching = true;
+			currentlyDispatching = eventListeners;
 			var numListeners = eventListeners.Count;
 			for (var i = 0; i < numListeners; i++)
 				(eventListeners[i] as EventListener<T>)(ev);
-			isDispatching = false;
+			currentlyDispatching = null;
 
-			ProcessRemovals();
+			ProcessRemovals(eventListeners);
 		}
 
-		private void ProcessRemovals()
+		private void ProcessRemovals(ArrayList eventListeners)
 		{
 			var numToRemove = toRemove.Count;
-			var numKeys = keyList.Count;
-			for (var toRemoveIndex = 0; toRemoveIndex < numToRemove; toRemoveIndex++)
-				for (var keyIndex = 0; keyIndex < numKeys; keyIndex++)
-					RemoveListener(toRemove[toRemoveIndex], keyList[keyIndex]);
+			for (var i = 0; i < numToRemove; i++)
+				eventListeners.Remove(toRemove[i]);
+			toRemove.Clear();
 		}
 
-		private void RemoveListener(object listener, Type type)
+		private void SafeRemoveFromAll(object listener, Type type)
 		{
-			listeners[type].Remove(listener);
-			onceListeners[type].Remove(listener);
-			allListeners.Remove(listener);
+			SafeRemoveFromList(listener, listeners[type]);
+			SafeRemoveFromList(listener, onceListeners[type]);
+			SafeRemoveFromList(listener, allListeners);
+		}
+
+		private void SafeRemoveFromList(object listener, ArrayList list)
+		{
+			if (list != currentlyDispatching)
+				list.Remove(listener);
+			else
+				toRemove.Add(listener);
 		}
 	}
 }
