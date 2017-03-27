@@ -216,11 +216,54 @@ namespace Bantam.Test
 		public void LockingAndUnlockingAllocatedWithTypeInstanceWithoutFreeingItDoesNotAllowItToBeAllocatedAgain()
 		{
 			var key = new object();
-			var first = testObj.Allocate(typeof(DummyType));
+			var first = testObj.Allocate(typeof(DummyType)) as DummyType;
 			testObj.Lock(first, key);
 			testObj.Unlock(first, key);
-			var second = testObj.Allocate(typeof(DummyType));
+			var second = testObj.Allocate(typeof(DummyType)) as DummyType;
 			Assert.AreNotSame(first, second);
+		}
+
+		[Test]
+		public void AllocatingAndFreeingInstanceDoesNotAddItToPoolTwice()
+		{
+			var first = testObj.Allocate<DummyType>();
+			testObj.Free(first);
+			var second = testObj.Allocate<DummyType>();
+			var third = testObj.Allocate<DummyType>();
+			Assert.AreNotSame(second, third);
+		}
+
+		[Test]
+		public void AllocatingAndFreeingWithTypeInstanceDoesNotAddItToPoolTwice()
+		{
+			var first = testObj.Allocate(typeof(DummyType)) as DummyType;
+			testObj.Free(typeof(DummyType), first);
+			var second = testObj.Allocate(typeof(DummyType)) as DummyType;
+			var third = testObj.Allocate(typeof(DummyType)) as DummyType;
+			Assert.AreNotSame(second, third);
+		}
+
+		[Test]
+		public void UnlockWithTypeThrowsExceptionForInvalidTypes()
+		{
+			var key = new object();
+			Assert.Throws<InvalidTypeException>(() => testObj.Unlock(typeof(NonPoolableType), new DummyType(), key));
+			Assert.Throws<InvalidTypeException>(() => testObj.Unlock(typeof(PoolableStruct), new PoolableStruct(), key));
+			Assert.Throws<InvalidTypeException>(() => testObj.Unlock(typeof(PoolableWithConstructor), new PoolableWithConstructor(5), key));
+		}
+
+		[Test]
+		public void UnlockWithTypeThrowsExceptionIfInstanceIsNull()
+		{
+			var key = new object();
+			Assert.Throws<NullInstanceException>(() => testObj.Unlock(typeof(DummyType), null, key));
+		}
+
+		[Test]
+		public void UnlockWithTypeThrowsExceptionIfInstanceDoesNotMatchGivenType()
+		{
+			var key = new object();
+			Assert.Throws<MismatchedTypeException>(() => testObj.Unlock(typeof(DummyType), new DummyEvent(), key));
 		}
 
 		[Test]

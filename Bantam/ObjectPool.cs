@@ -32,24 +32,12 @@ namespace Bantam
 			if (null == instance)
 				throw new NullInstanceException();
 			Unlock(instance, this);
-			if (IsLocked(instance))
-				return;
-			EnsurePoolExists<T>();
-			instances[typeof(T)].Enqueue(instance);
 		}
 
 		public void Free(Type type, Poolable instance)
 		{
-			if (null == instance)
-				throw new NullInstanceException();
+			Validate(type, instance);
 			Unlock(type, instance, this);
-			if (IsLocked(instance))
-				return;
-			ValidateType(type);
-			if (!type.IsInstanceOfType(instance))
-				throw new MismatchedTypeException();
-			EnsurePoolExists(type);
-			instances[type].Enqueue(instance);
 		}
 
 		public void Lock(Poolable instance, object key)
@@ -65,6 +53,7 @@ namespace Bantam
 
 		public void Unlock(Type type, Poolable instance, object key)
 		{
+			Validate(type, instance);
 			MultiLock instanceLock;
 			lockedInstances.TryGetValue(instance, out instanceLock);
 			if (null == instanceLock)
@@ -74,8 +63,17 @@ namespace Bantam
 			{
 				lockedInstances.Remove(instance);
 				FreeInternalLock(instanceLock);
-				Free(type, instance);
+				InternalFree(type, instance);
 			}
+		}
+
+		private void Validate(Type type, Poolable instance)
+		{
+			if (null == instance)
+				throw new NullInstanceException();
+			ValidateType(type);
+			if (!type.IsInstanceOfType(instance))
+				throw new MismatchedTypeException();
 		}
 
 		private void EnsurePoolExists<T>()
@@ -152,6 +150,12 @@ namespace Bantam
 		{
 			EnsurePoolExists<MultiLock>();
 			instances[typeof(MultiLock)].Enqueue(internalLock);
+		}
+
+		private void InternalFree(Type type, Poolable instance)
+		{
+			EnsurePoolExists(type);
+			instances[type].Enqueue(instance);
 		}
 	}
 
