@@ -1,31 +1,39 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace Bantam
 {
 	public class ObjectPool
 	{
-		private Dictionary<Type, Queue<Poolable>> instances = new Dictionary<Type, Queue<Poolable>>();
 		public Dictionary<Type, int> UniqueInstances = new Dictionary<Type, int>();
+
+		private Dictionary<Type, Queue<Poolable>> instances = new Dictionary<Type, Queue<Poolable>>();
+		private Dictionary<Poolable, MultiLock> lockedInstances = new Dictionary<Poolable, MultiLock>();
 
 		public T Allocate<T>() where T : class, Poolable, new()
 		{
 			EnsurePoolExists<T>();
-			return GetInstance<T>();
+			var instance = GetInstance<T>();
+			Lock(instance, this);
+			return instance;
 		}
 
 		public Poolable Allocate(Type type)
 		{
 			ValidateType(type);
 			EnsurePoolExists(type);
-			return GetInstance(type);
+			var instance = GetInstance(type);
+			Lock(instance, this);
+			return instance;
 		}
 
 		public void Free<T>(T instance) where T : Poolable
 		{
 			if (null == instance)
 				throw new NullInstanceException();
+			Unlock(instance, this);
+			if (IsLocked(instance))
+				return;
 			EnsurePoolExists<T>();
 			instances[typeof(T)].Enqueue(instance);
 		}
@@ -34,11 +42,40 @@ namespace Bantam
 		{
 			if (null == instance)
 				throw new NullInstanceException();
+			Unlock(type, instance, this);
+			if (IsLocked(instance))
+				return;
 			ValidateType(type);
 			if (!type.IsInstanceOfType(instance))
 				throw new MismatchedTypeException();
 			EnsurePoolExists(type);
 			instances[type].Enqueue(instance);
+		}
+
+		public void Lock(Poolable instance, object key)
+		{
+			EnsureLockExists(instance);
+			lockedInstances[instance].Lock(key);
+		}
+
+		public void Unlock<T>(T instance, object key) where T : Poolable
+		{
+			Unlock(typeof(T), instance, key);
+		}
+
+		public void Unlock(Type type, Poolable instance, object key)
+		{
+			MultiLock instanceLock;
+			lockedInstances.TryGetValue(instance, out instanceLock);
+			if (null == instanceLock)
+				return;
+			instanceLock.Unlock(key);
+			if (!instanceLock.IsLocked)
+			{
+				lockedInstances.Remove(instance);
+				FreeInternalLock(instanceLock);
+				Free(type, instance);
+			}
 		}
 
 		private void EnsurePoolExists<T>()
@@ -53,6 +90,12 @@ namespace Bantam
 				instances[type] = new Queue<Poolable>();
 				UniqueInstances[type] = 0;
 			}
+		}
+
+		private void EnsureLockExists(Poolable instance)
+		{
+			if (!lockedInstances.ContainsKey(instance))
+				lockedInstances[instance] = AllocateInternalLock();
 		}
 
 		private void ValidateType(Type type)
@@ -92,6 +135,23 @@ namespace Bantam
 				instance = instances[type].Dequeue();
 			instance.Reset();
 			return instance;
+		}
+
+		private bool IsLocked(Poolable instance)
+		{
+			return lockedInstances.ContainsKey(instance);
+		}
+
+		private MultiLock AllocateInternalLock()
+		{
+			EnsurePoolExists<MultiLock>();
+			return GetInstance<MultiLock>();
+		}
+
+		private void FreeInternalLock(MultiLock internalLock)
+		{
+			EnsurePoolExists<MultiLock>();
+			instances[typeof(MultiLock)].Enqueue(internalLock);
 		}
 	}
 
