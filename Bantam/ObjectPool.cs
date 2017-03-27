@@ -7,8 +7,8 @@ namespace Bantam
 	{
 		public Dictionary<Type, int> UniqueInstances = new Dictionary<Type, int>();
 
-		private Dictionary<Type, Queue<Poolable>> instances = new Dictionary<Type, Queue<Poolable>>();
-		private Dictionary<Poolable, MultiLock> lockedInstances = new Dictionary<Poolable, MultiLock>();
+		private readonly Dictionary<Type, Queue<Poolable>> instances = new Dictionary<Type, Queue<Poolable>>();
+		private readonly Dictionary<Poolable, MultiLock> lockedInstances = new Dictionary<Poolable, MultiLock>();
 
 		public T Allocate<T>() where T : class, Poolable, new()
 		{
@@ -36,7 +36,6 @@ namespace Bantam
 
 		public void Free(Type type, Poolable instance)
 		{
-			Validate(type, instance);
 			Unlock(type, instance, this);
 		}
 
@@ -133,11 +132,6 @@ namespace Bantam
 				instance = instances[type].Dequeue();
 			instance.Reset();
 			return instance;
-		}
-
-		private bool IsLocked(Poolable instance)
-		{
-			return lockedInstances.ContainsKey(instance);
 		}
 
 		private MultiLock AllocateInternalLock()
