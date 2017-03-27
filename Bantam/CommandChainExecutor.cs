@@ -73,6 +73,7 @@ namespace Bantam
 			this.pool = pool;
 			failureAllocator = chain.FailureCommand;
 			enumerator = chain.Commands.GetEnumerator();
+			pool.Lock(triggeringEvent, this);
 			enumerator.MoveNext();
 			Next();
 		}
@@ -84,7 +85,10 @@ namespace Bantam
 			if (enumerator.MoveNext())
 				Next();
 			else
+			{
+				pool.Unlock(triggeringEvent.GetType(), triggeringEvent, this);
 				manager.CompleteChainExecution<EventCommandChainExecutor>(this);
+			}
 		}
 
 		public void CurrentCommandFailed()

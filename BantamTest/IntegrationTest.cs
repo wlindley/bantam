@@ -62,7 +62,7 @@ namespace Bantam.Test
 
 			Assert.AreEqual(1, pool.UniqueInstances[typeof(LoginEvent)]);
 			Assert.AreEqual(1, pool.UniqueInstances[typeof(LoginFailedEvent)]);
-			Assert.AreEqual(1, pool.UniqueInstances[typeof(LoginSuccessEvent)]);
+			Assert.AreEqual(2, pool.UniqueInstances[typeof(LoginSuccessEvent)]);
 			Assert.AreEqual(2, pool.UniqueInstances[typeof(LoginCommand)]); //A second LoginCommand is needed to respond to the first one failing before the first LoginCommand's Done method is called.
 			Assert.AreEqual(1, pool.UniqueInstances[typeof(RecordLoginCommand)]);
 			Assert.AreEqual(1, pool.UniqueInstances[typeof(UpdateDisplayNameCommand)]);

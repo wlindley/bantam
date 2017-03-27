@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System.Collections.Generic;
+using NUnit.Framework;
 
 namespace Bantam.Test
 {
@@ -16,6 +17,8 @@ namespace Bantam.Test
 			testObj = new CommandRelay(eventBus, pool);
 			DummyCommand.ExecuteCount = 0;
 			DummyCommand.LastValue = 0;
+			AsyncCommand.triggeringEvents.Clear();
+			AsyncCommand.ClearAll();
 		}
 
 		[Test]
@@ -103,6 +106,26 @@ namespace Bantam.Test
 			eventBus.Dispatch<DummyEvent>(evt => evt.value = expectedValue);
 			Assert.AreEqual(expectedValue, DummyCommand.LastValue);
 		}
+
+		[Test]
+		public void AsyncCommandChainsLockTriggeringEvent()
+		{
+			testObj.On<DummyEvent>().Do<AsyncCommand>((cmd, evt) => cmd.trigger = evt);
+			eventBus.Dispatch<DummyEvent>();
+			eventBus.Dispatch<DummyEvent>();
+			Assert.AreNotSame(AsyncCommand.triggeringEvents[0], AsyncCommand.triggeringEvents[1]);
+		}
+
+		[Test]
+		public void AsyncCommandChainsReleaseLockOnTriggeringEventWhenTheyComplete()
+		{
+			testObj.On<DummyEvent>().Do<AsyncCommand>((cmd, evt) => cmd.trigger = evt);
+			eventBus.Dispatch<DummyEvent>();
+			eventBus.Dispatch<DummyEvent>();
+			AsyncCommand.CompleteAll();
+			eventBus.Dispatch<DummyEvent>();
+			Assert.AreSame(AsyncCommand.triggeringEvents[0], AsyncCommand.triggeringEvents[2]);
+		}
 	}
 
 	public class DummyCommand : Command
@@ -124,6 +147,38 @@ namespace Bantam.Test
 		public override void Execute()
 		{
 			Fail();
+		}
+	}
+
+	public class AsyncCommand : Command
+	{
+		private static List<AsyncCommand> commands = new List<AsyncCommand>();
+		public static List<Event> triggeringEvents = new List<Event>();
+		public Event trigger;
+
+		public override void Execute()
+		{
+			commands.Add(this);
+			Retain();
+			triggeringEvents.Add(trigger);
+		}
+
+		public static void CompleteAll()
+		{
+			foreach (var c in commands)
+				c.Done();
+			ClearAll();
+		}
+
+		public static void ClearAll()
+		{
+			commands.Clear();
+		}
+
+		public override void Reset()
+		{
+			base.Reset();
+			trigger = null;
 		}
 	}
 }

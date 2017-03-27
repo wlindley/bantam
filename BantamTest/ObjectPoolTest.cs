@@ -1,5 +1,4 @@
-﻿using System;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
 namespace Bantam.Test
 {
@@ -40,7 +39,7 @@ namespace Bantam.Test
 		public void FreeAllowsObjectToBeUsedAgain()
 		{
 			var first = testObj.Allocate<DummyType>();
-			testObj.Free<DummyType>(first);
+			testObj.Free(first);
 			var second = testObj.Allocate<DummyType>();
 			Assert.AreSame(first, second);
 		}
@@ -108,6 +107,163 @@ namespace Bantam.Test
 		public void FreeWithTypeThrowsExceptionIfInstanceDoesNotMatchGivenType()
 		{
 			Assert.Throws<MismatchedTypeException>(() => testObj.Free(typeof(DummyType), new DummyEvent()));
+		}
+
+		[Test]
+		public void LockOnAnInstancePreventsItFromBeingAllocated()
+		{
+			var key = new object();
+			var first = testObj.Allocate<DummyType>();
+			testObj.Lock(first, key);
+			testObj.Free(first);
+			var second = testObj.Allocate<DummyType>();
+			Assert.AreNotSame(first, second);
+		}
+
+		[Test]
+		public void LockAndUnlockWithSameKeyOnAnInstanceAllowsItToBeAllocated()
+		{
+			var key = new object();
+			var first = testObj.Allocate<DummyType>();
+			testObj.Lock(first, key);
+			testObj.Free(first);
+			testObj.Unlock(first, key);
+			var second = testObj.Allocate<DummyType>();
+			Assert.AreSame(first, second);
+		}
+
+		[Test]
+		public void LockAndUnlockWithDifferentKeysOnAnInstanceDoesNotAllowItToBeAllocated()
+		{
+			var firstKey = new object();
+			var secondKey = new object();
+			var first = testObj.Allocate<DummyType>();
+			testObj.Lock(first, firstKey);
+			testObj.Free(first);
+			testObj.Unlock(first, secondKey);
+			var second = testObj.Allocate<DummyType>();
+			Assert.AreNotSame(first, second);
+		}
+
+		[Test]
+		public void UnlockingInstanceWithoutLockingItDoesNotAddItToPool()
+		{
+			var key = new object();
+			var first = new DummyType();
+			testObj.Unlock(first, key);
+			var second = testObj.Allocate<DummyType>();
+			Assert.AreNotSame(first, second);
+		}
+
+		[Test]
+		public void LockOnAnInstancePreventsItFromBeingAllocatedWithType()
+		{
+			var key = new object();
+			var first = testObj.Allocate(typeof(DummyType));
+			testObj.Lock(first, key);
+			testObj.Free(typeof(DummyType), first);
+			var second = testObj.Allocate(typeof(DummyType));
+			Assert.AreNotSame(first, second);
+		}
+
+		[Test]
+		public void LockAndUnlockWithTypeAndSameKeyOnAnInstanceAllowsItToBeAllocated()
+		{
+			var key = new object();
+			var first = testObj.Allocate(typeof(DummyType));
+			testObj.Lock(first, key);
+			testObj.Free(typeof(DummyType), first);
+			testObj.Unlock(typeof(DummyType), first, key);
+			var second = testObj.Allocate(typeof(DummyType));
+			Assert.AreSame(first, second);
+		}
+
+		[Test]
+		public void LockAndUnlockWithTypeAndDifferentKeysOnAnInstanceDoesNotAllowItToBeAllocated()
+		{
+			var firstKey = new object();
+			var secondKey = new object();
+			var first = testObj.Allocate(typeof(DummyType));
+			testObj.Lock(first, firstKey);
+			testObj.Free(typeof(DummyType), first);
+			testObj.Unlock(typeof(DummyType), first, secondKey);
+			var second = testObj.Allocate(typeof(DummyType));
+			Assert.AreNotSame(first, second);
+		}
+
+		[Test]
+		public void UnlockingInstanceWithTypeWithoutLockingItDoesNotAddItToPool()
+		{
+			var key = new object();
+			var first = new DummyType();
+			testObj.Unlock(typeof(DummyType), first, key);
+			var second = testObj.Allocate(typeof(DummyType));
+			Assert.AreNotSame(first, second);
+		}
+
+		[Test]
+		public void LockingAndUnlockingAllocatedInstanceWithoutFreeingItDoesNotAllowItToBeAllocatedAgain()
+		{
+			var key = new object();
+			var first = testObj.Allocate<DummyType>();
+			testObj.Lock(first, key);
+			testObj.Unlock(first, key);
+			var second = testObj.Allocate<DummyType>();
+			Assert.AreNotSame(first, second);
+		}
+
+		[Test]
+		public void LockingAndUnlockingAllocatedWithTypeInstanceWithoutFreeingItDoesNotAllowItToBeAllocatedAgain()
+		{
+			var key = new object();
+			var first = testObj.Allocate(typeof(DummyType)) as DummyType;
+			testObj.Lock(first, key);
+			testObj.Unlock(first, key);
+			var second = testObj.Allocate(typeof(DummyType)) as DummyType;
+			Assert.AreNotSame(first, second);
+		}
+
+		[Test]
+		public void AllocatingAndFreeingInstanceDoesNotAddItToPoolTwice()
+		{
+			var first = testObj.Allocate<DummyType>();
+			testObj.Free(first);
+			var second = testObj.Allocate<DummyType>();
+			var third = testObj.Allocate<DummyType>();
+			Assert.AreNotSame(second, third);
+		}
+
+		[Test]
+		public void AllocatingAndFreeingWithTypeInstanceDoesNotAddItToPoolTwice()
+		{
+			var first = testObj.Allocate(typeof(DummyType)) as DummyType;
+			testObj.Free(typeof(DummyType), first);
+			var second = testObj.Allocate(typeof(DummyType)) as DummyType;
+			var third = testObj.Allocate(typeof(DummyType)) as DummyType;
+			Assert.AreNotSame(second, third);
+		}
+
+		[Test]
+		public void UnlockWithTypeThrowsExceptionForInvalidTypes()
+		{
+			var key = new object();
+			Assert.Throws<InvalidTypeException>(() => testObj.Unlock(typeof(NonPoolableType), new DummyType(), key));
+			Assert.Throws<InvalidTypeException>(() => testObj.Unlock(typeof(PoolableStruct), new PoolableStruct(), key));
+			Assert.Throws<InvalidTypeException>(() => testObj.Unlock(typeof(PoolableWithConstructor), new PoolableWithConstructor(5), key));
+		}
+
+		[Test]
+		public void UnlockWithTypeThrowsExceptionIfInstanceIsNull()
+		{
+			var key = new object();
+			Assert.Throws<NullInstanceException>(() => testObj.Unlock(typeof(DummyType), null, key));
+		}
+
+		[Test]
+		public void UnlockWithTypeThrowsExceptionIfInstanceDoesNotMatchGivenType()
+		{
+			var key = new object();
+			Assert.Throws<MismatchedTypeException>(() => testObj.Unlock(typeof(DummyType), new DummyEvent(), key));
 		}
 
 		[Test]
