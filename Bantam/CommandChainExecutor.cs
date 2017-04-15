@@ -111,6 +111,7 @@ namespace Bantam
 		{
 			currentAllocator = failureAllocator;
 			failureAllocator = null;
+			while (enumerator.MoveNext()) { }
 			StartCommandFromCurrentAllocator();
 		}
 

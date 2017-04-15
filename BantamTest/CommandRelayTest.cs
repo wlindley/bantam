@@ -108,6 +108,14 @@ namespace Bantam.Test
 		}
 
 		[Test]
+		public void OnFailureDoesNotReturnToMainChainWhenItSucceeds()
+		{
+			testObj.On<DummyEvent>().Do<FailingCommand>().Do<DummyCommand>().OnFailure<DummyCommand>();
+			eventBus.Dispatch<DummyEvent>();
+			Assert.AreEqual(1, DummyCommand.ExecuteCount);
+		}
+
+		[Test]
 		public void AsyncCommandChainsLockTriggeringEvent()
 		{
 			testObj.On<DummyEvent>().Do<AsyncCommand>((cmd, evt) => cmd.trigger = evt);
