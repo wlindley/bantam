@@ -115,7 +115,14 @@ namespace Bantam
 				UniqueInstances[type]++;
 			}
 			else
-				instance = instances[type].Dequeue() as T;
+			{
+				var poolable = instances[type].Dequeue();
+				if (null == poolable)
+					throw new NullInPoolException1();
+				if (!(poolable is T))
+					throw new MismatchedTypeInPoolException1();
+				instance = poolable as T;
+			}
 			instance.Reset();
 			return instance;
 		}
@@ -127,9 +134,19 @@ namespace Bantam
 			{
 				instance = Activator.CreateInstance(type) as Poolable;
 				UniqueInstances[type]++;
+				if (null == instance)
+					throw new NullInPoolException2();
+				if (!type.IsInstanceOfType(instance))
+					throw new MismatchedTypeInPoolException2();
 			}
 			else
+			{
 				instance = instances[type].Dequeue();
+				if (null == instance)
+					throw new NullInPoolException3();
+				if (!type.IsInstanceOfType(instance))
+					throw new MismatchedTypeInPoolException3();
+			}
 			instance.Reset();
 			return instance;
 		}
@@ -157,4 +174,10 @@ namespace Bantam
 	public class InvalidTypeException : ObjectPoolException {}
 	public class NullInstanceException : ObjectPoolException {}
 	public class MismatchedTypeException : ObjectPoolException {}
+	public class NullInPoolException1 : ObjectPoolException {}
+	public class MismatchedTypeInPoolException1 : ObjectPoolException {}
+	public class NullInPoolException2 : ObjectPoolException { }
+	public class MismatchedTypeInPoolException2 : ObjectPoolException { }
+	public class NullInPoolException3 : ObjectPoolException { }
+	public class MismatchedTypeInPoolException3 : ObjectPoolException { }
 }
